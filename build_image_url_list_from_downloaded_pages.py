@@ -136,7 +136,7 @@ $f_back_bottle_img"""
 
 
 
-            if self.url_idx >= 4:
+            if self.url_idx >= len(self.files_to_parse()):
              
                 self.loadFinished.disconnect(self.trigger_checks)                        
                 self.done.emit()
