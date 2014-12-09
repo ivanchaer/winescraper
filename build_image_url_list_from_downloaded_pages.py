@@ -144,10 +144,10 @@ class Browser(QWebView):
                 self.done.emit()
 
             else:
-                self.get_next("Error on %s" % self.current_url())
+                self.get_next()
 
         else:
-            print >> self.log_file, 
+            print >> self.log_file, "Error on %s" % self.current_url()
             self.get_next()
 
 
