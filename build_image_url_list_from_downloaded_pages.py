@@ -53,8 +53,10 @@ class Browser(QWebView):
         if len(self.downloaded_file_list) > 0:
             return self.downloaded_file_list
 
+        downloaded_files = []
+
         for root, dirs, files in os.walk('pages'):
-            downloaded_files = [join(root, page) for page in files if getsize(join(root, page)) > 0 and page[-4:] == 'html']
+            downloaded_files += [join(root, page) for page in files if getsize(join(root, page)) > 0 and page[-4:] == 'html']
 
         self.downloaded_file_list = downloaded_files
 
