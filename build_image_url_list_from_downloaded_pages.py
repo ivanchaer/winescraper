@@ -60,9 +60,6 @@ class Browser(QWebView):
 
         return downloaded_files
 
-    def get_url_from_file_name(self, filename):
-        wine_id = filename.split('/')[1][0:-5]
-        return [wine_url[2] for wine_url in wine_urls if wine_url[1] == wine_id][0]
 
     def current_url(self):
         return self.files_to_parse()[self.url_idx]
