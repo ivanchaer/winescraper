@@ -9,7 +9,7 @@ import time
 
 from string import Template 
 
-from wine_urls import wine_urls
+from entries import wine_urls
 
 import os
 from os.path import join, getsize
