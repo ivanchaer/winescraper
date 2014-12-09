@@ -37,7 +37,8 @@ class Browser(QWebView):
         st=self.settings()
         st.setAttribute(st.AutoLoadImages,False)
 
-        self.outputFile = codecs.open('./py-out.html', encoding="utf-8", mode="w")
+        self.outputFile = codecs.open('./image_urls.txt', encoding="utf-8", mode="w")
+        self.log_file = codecs.open('./errors_getting_image_url_list.txt', encoding="utf-8", mode="w")
        
         self.loadFinished.connect(self.trigger_checks)
 
@@ -89,14 +90,6 @@ class Browser(QWebView):
         self.page().mainFrame().load(self.current_url())
 
 
-    def row_template(self, data):
-
-        template = """$f_img
-$f_front_bottle_img
-$f_back_bottle_img"""
-
-        return Template(template).safe_substitute(data) 
-
 
     def generate_bottle_image_urls(self, original_image_url, bottle_position):
 
@@ -123,17 +116,26 @@ $f_back_bottle_img"""
 
         if not form.isNull():
 
-            row_values = dict(
-                f_img = form.evaluateJavaScript(" $(this).find('img.hero').attr('src')").strip(),
-                f_front_bottle_img = self.generate_bottle_image_urls(form.evaluateJavaScript(" $(this).find('img.hero:not([alt~=label])').attr('src')"), 'front'),
-                f_back_bottle_img = self.generate_bottle_image_urls(form.evaluateJavaScript(" $(this).find('img.hero:not([alt~=label])').attr('src')"), 'back'),
-                
-            )
+            f_url = self.get_url_from_file_name(self.current_url())
+            f_img = form.evaluateJavaScript(" $(this).find('img.hero').attr('src')")
+            f_front_bottle_img = self.generate_bottle_image_urls(form.evaluateJavaScript(" $(this).find('img.hero:not([alt~=label])').attr('src')"), 'front')
+            f_back_bottle_img = self.generate_bottle_image_urls(form.evaluateJavaScript(" $(this).find('img.hero:not([alt~=label])').attr('src')"), 'back')
+            
+        
 
             # self.formatted_data += self.row_template(row_values)
 
-            print >> self.outputFile, self.row_template(row_values)
+            if f_url != '':
+                print >> self.outputFile, '// %s' % f_url
 
+            if f_img != '':
+                print >> self.outputFile, f_img
+
+            if f_front_bottle_img != '':
+                print >> self.outputFile, f_front_bottle_img
+
+            if f_back_bottle_img != '':
+                print >> self.outputFile, f_back_bottle_img
 
 
             if self.url_idx >= len(self.files_to_parse()):
@@ -142,9 +144,10 @@ $f_back_bottle_img"""
                 self.done.emit()
 
             else:
-                self.get_next()
+                self.get_next("Error on %s" % self.current_url())
 
         else:
+            print >> self.log_file, 
             self.get_next()
 
 
