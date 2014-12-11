@@ -114,7 +114,7 @@ class Browser(QWebView):
 
     def retrieve_data(self):
 
-        time.sleep(0.5)
+        
 
         # embed jquery
         self.page().mainFrame().evaluateJavaScript(open('jquery.js').read())
