@@ -109,7 +109,7 @@ class Browser(QWebView):
         try:
             wine_id = filename.split('/')[1][0:-5]
 
-            return [url for wine_url in wine_urls if wine_url[1] == wine_id][0]
+            return [url for wine_url in wine_urls if wine_url.index(1) == wine_id].index(0)
         except:
             print >> self.log_file, "Error on %s" % filename
             return ''
