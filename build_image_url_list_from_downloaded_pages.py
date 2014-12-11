@@ -132,16 +132,16 @@ class Browser(QWebView):
 
             # self.formatted_data += self.row_template(row_values)
 
-            if f_url != '':
+            if f_url:
                 print >> self.outputFile, '// %s' % f_url
 
-            if f_img != '':
+            if f_img:
                 print >> self.outputFile, f_img
 
-            if f_front_bottle_img != '':
+            if f_front_bottle_img:
                 print >> self.outputFile, f_front_bottle_img
 
-            if f_back_bottle_img != '':
+            if f_back_bottle_img:
                 print >> self.outputFile, f_back_bottle_img
 
 
