@@ -108,13 +108,14 @@ class Browser(QWebView):
     def get_url_from_file_name(self, filename):
         try:
             wine_id = filename.split('/')[1][0:-5]
+            
             return [wine_url[2] for wine_url in wine_urls if wine_url[1] == wine_id][0]
         except ValueError:
             return ''
 
     def retrieve_data(self):
 
-        
+        time.sleep(0.5)
 
         # embed jquery
         self.page().mainFrame().evaluateJavaScript(open('jquery.js').read())
