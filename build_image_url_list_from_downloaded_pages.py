@@ -14,6 +14,7 @@ from entries import wine_urls
 import os
 from os.path import join, getsize
 
+import time
 
 class WebPage(QWebPage):
     def userAgentForUrl(self, url):
@@ -112,6 +113,8 @@ class Browser(QWebView):
             return ''
 
     def retrieve_data(self):
+
+        time.sleep(0.5)
 
         # embed jquery
         self.page().mainFrame().evaluateJavaScript(open('jquery.js').read())
