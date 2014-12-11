@@ -108,9 +108,10 @@ class Browser(QWebView):
     def get_url_from_file_name(self, filename):
         try:
             wine_id = filename.split('/')[1][0:-5]
-            
-            return [wine_url[2] for wine_url in wine_urls if wine_url[1] == wine_id][0]
-        except ValueError:
+
+            return [url for wine_url in wine_urls if wine_url[1] == wine_id][0]
+        except ValueError or IndexError:
+            print >> self.log_file, "Error on %s" % filename
             return ''
 
     def retrieve_data(self):
