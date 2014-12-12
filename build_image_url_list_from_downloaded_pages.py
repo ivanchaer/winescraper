@@ -28,6 +28,8 @@ class Browser(QWebView):
 
     url_idx = 0
 
+    logs_root = './logs/image_urls/'
+
     downloaded_file_list = []
 
     def __init__(self):
@@ -38,8 +40,9 @@ class Browser(QWebView):
         st=self.settings()
         st.setAttribute(st.AutoLoadImages,False)
 
-        self.outputFile = codecs.open('./image_urls.txt', encoding="utf-8", mode="w")
-        self.log_file = codecs.open('./errors_getting_image_url_list.txt', encoding="utf-8", mode="w")
+        self.image_urls_log_file = codecs.open(self.logs_root + 'image_urls.txt', encoding="utf-8", mode="w")
+        self.error_log_file = codecs.open(self.logs_root + 'errors_getting_image_url_list.txt', encoding="utf-8", mode="w")
+        self.tracked_pages_log_file = codecs.open(self.logs_root + 'tracked_pages.txt', encoding="utf-8", mode="w")
        
         self.loadFinished.connect(self.trigger_checks)
 
@@ -112,11 +115,11 @@ class Browser(QWebView):
             url = [wine_url[2] for wine_url in wine_urls if wine_url[1] == wine_id][0:1] or []
 
             if not url:
-                print >> self.log_file, "Error on %s" % filename
+                print >> self.error_log_file, "Error on %s" % filename
                 
             return url
         except:
-            print >> self.log_file, "Error on %s" % filename
+            print >> self.error_log_file, "Error on %s" % filename
             return ''
 
     def retrieve_data(self):
@@ -143,16 +146,19 @@ class Browser(QWebView):
             # self.formatted_data += self.row_template(row_values)
 
             if f_url:
-                print >> self.outputFile, '// %s' % f_url
+                print >> self.image_urls_log_file, '// %s' % f_url
 
             if f_img:
-                print >> self.outputFile, f_img
+                print >> self.image_urls_log_file, f_img
 
             if f_front_bottle_img:
-                print >> self.outputFile, f_front_bottle_img
+                print >> self.image_urls_log_file, f_front_bottle_img
 
             if f_back_bottle_img:
-                print >> self.outputFile, f_back_bottle_img
+                print >> self.image_urls_log_file, f_back_bottle_img
+
+
+            print >> self.tracked_pages_log_file, self.current_url()
 
 
             if self.url_idx >= len(self.files_to_parse()):
@@ -164,7 +170,7 @@ class Browser(QWebView):
                 self.get_next()
 
         else:
-            print >> self.log_file, "Error on %s" % self.current_url()
+            print >> self.error_log_file, "Error on %s" % self.current_url()
             self.get_next()
 
 
