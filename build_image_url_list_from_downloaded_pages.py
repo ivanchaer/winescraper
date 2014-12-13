@@ -16,6 +16,8 @@ from os.path import join, getsize
 
 import time
 
+import json
+
 class WebPage(QWebPage):
     def userAgentForUrl(self, url):
         return "Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0"
@@ -40,9 +42,14 @@ class Browser(QWebView):
         st=self.settings()
         st.setAttribute(st.AutoLoadImages,False)
 
-        self.image_urls_log_file = codecs.open(self.logs_root + 'image_urls.txt', encoding="utf-8", mode="w")
-        self.error_log_file = codecs.open(self.logs_root + 'errors_getting_image_url_list.txt', encoding="utf-8", mode="w")
-        self.tracked_pages_log_file = codecs.open(self.logs_root + 'tracked_pages.txt', encoding="utf-8", mode="w")
+        self.image_urls_log_file = codecs.open(self.logs_root + 'image_urls.txt', encoding="utf-8", mode="a+")
+        self.error_log_file = codecs.open(self.logs_root + 'errors_getting_image_url_list.txt', encoding="utf-8", mode="a")
+        self.tracked_pages_log_file = codecs.open(self.logs_root + 'tracked_pages.txt', encoding="utf-8", mode="a+")
+
+        self.tracked_pages_log_file.seek(0)
+        
+        self.tracked_page_list = self.tracked_pages_log_file.read().splitlines()
+
        
         self.loadFinished.connect(self.trigger_checks)
 
@@ -61,7 +68,12 @@ class Browser(QWebView):
         downloaded_files = []
 
         for root, dirs, files in os.walk('pages'):
-            downloaded_files += [join(root, page) for page in files if getsize(join(root, page)) > 0 and page[-4:] == 'html']
+            # if there is a page downloaded,
+            # if its size is bigger than zero
+            # if it is an html
+            # if the page hasn't already been tracked (check the tracked pages log)
+            downloaded_files = [join(root, page) for page in files if getsize(join(root, page)) > 0 and page[-4:] == 'html' and join(root, page) not in self.tracked_page_list]
+
 
         self.downloaded_file_list = downloaded_files
 
@@ -82,14 +94,21 @@ class Browser(QWebView):
         if ok:
 
             print 'Parsing %s' % self.current_url()
-            self.retrieve_data()
+            QTimer.singleShot(70, self.retrieve_data)
 
         else:
             print "Error while downloading %s\nSkipping."%self.current_url()
     
     def get_next(self):
 
+        # increase url list index
         self.url_idx += 1
+
+        # if there are still pages to be retrieved
+        if self.url_idx >= len(self.files_to_parse()) - 1:
+             
+                self.loadFinished.disconnect(self.trigger_checks)                        
+                self.done.emit()
 
         self.page().mainFrame().load(self.current_url())
 
@@ -124,7 +143,6 @@ class Browser(QWebView):
 
     def retrieve_data(self):
 
-        time.sleep(0.5)
 
         # embed jquery
         self.page().mainFrame().evaluateJavaScript(open('jquery.js').read())
@@ -160,14 +178,10 @@ class Browser(QWebView):
 
             print >> self.tracked_pages_log_file, self.current_url()
 
+            self.get_next()
 
-            if self.url_idx >= len(self.files_to_parse()):
-             
-                self.loadFinished.disconnect(self.trigger_checks)                        
-                self.done.emit()
 
-            else:
-                self.get_next()
+
 
         else:
             print >> self.error_log_file, "Error on %s" % self.current_url()
